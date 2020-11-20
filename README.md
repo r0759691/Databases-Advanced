@@ -5,6 +5,7 @@ sudo apt-get update -y
 sudo apt-get install -y python-beautifulsoup
 
 
+
 Opdracht Mongo
 Commands to enter into terminal to start up MongoDB Server:
 sudo apt-get install mongodb
