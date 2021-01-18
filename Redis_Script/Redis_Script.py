@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import time
 import threading
 import redis
+import json
 
 r = redis.Redis()
 #col_DaDbBits = "DaDbBits"
@@ -25,10 +26,13 @@ def scraper():
         line.append(float(Rest_elem[i*3+1].text.replace(" BTC", "")))
         line.append(Rest_elem[i*3+2].text)
         content.append(line)
-    
+  
     content.sort(key=lambda x:x[2])
-    r.mset({"Hash": content[-1][0], "Time": content[-1][1], "BTC":  content[-1][2], "Dollars":  content[-1][3]})
+    Redis_json = {"Hash": content[-1][0], "Time": content[-1][1], "BTC": str(content[-1][2]), "Dollars": content[-1][3]}
+    json_dump = json.dumps(Redis_json)
+    r.set("Hash", json_dump, ex=60)
     r.get("Hash")
+    print(Redis_json)
 
 while True:
     scraper()
