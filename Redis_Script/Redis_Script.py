@@ -16,8 +16,8 @@ def scraper():
     Hash_elem = soup.select("a.sc-1r996ns-0.fLwyDF.sc-1tbyx6t-1.kCGMTY.iklhnl-0.eEewhk.d53qjk-0.ctEFcK")
 
     Rest_elem = soup.select("span.sc-1ryi78w-0.cILyoi.sc-16b9dsl-1.ZwupP.u3ufsr-0.eQTRKC")
-    #for i in range(len(Rest_elem)):
-    #    print(Rest_elem[i].text)
+    for i in range(len(Rest_elem)):
+        print(Rest_elem[i].text)
 
     content = []
     for i in range(len(Hash_elem)):
