@@ -2,22 +2,42 @@ import requests
 from bs4 import BeautifulSoup
 import time
 import threading
+from pymongo import MongoClient
 
-#De output van deze functie ging in een json steken en die json meegeven aan de gemaakt mongoDB server.
-#Jammer genoeg had ik hiervoor geen tijd meer en begrijp dat ik hier een nul op haal.
+client = MongoClient("mongodb://127.0.01:27017")
+Da_db = client["DaDbBits"]
+col_DaDbBits = Da_db["DaDbBits"]
 
 def scraper():
     page = requests.get('https://www.blockchain.com/btc/unconfirmed-transactions')
 
     soup = BeautifulSoup(page.content, 'html.parser')
 
-    Hash_elem = soup.find_all('a', class_='sc-1r996ns-0 gzrtQD sc-1tbyx6t-1 kXxRxe iklhnl-0 boNhIO d53qjk-0 jmTmMY')
+    Hash_elem = soup.select("a.sc-1r996ns-0.fLwyDF.sc-1tbyx6t-1.kCGMTY.iklhnl-0.eEewhk.d53qjk-0.ctEFcK")
 
-    Rest_elem = soup.find_all('span', class_='sc-1ryi78w-0 gCzMgE sc-16b9dsl-1 kUAhZx u3ufsr-0 fGQJzg')
+    Rest_elem = soup.select("span.sc-1ryi78w-0.cILyoi.sc-16b9dsl-1.ZwupP.u3ufsr-0.eQTRKC")
+    #for i in range(len(Rest_elem)):
+    #    print(Rest_elem[i].text)
 
-    with open("Blockchain_Scraper_Logfile.txt", "a") as f:
-        print(Hash_elem[-1].text + ', ' +Rest_elem[-3].text  + ', ' + Rest_elem[-2].text + ', ' + Rest_elem[-1].text, file=f)
+    content = []    
+    for i in range(len(Hash_elem)):
+        line = []
+        line.append(Hash_elem[i].text)
+        line.append(Rest_elem[i*3].text)
+        line.append(float(Rest_elem[i*3+1].text.replace(" BTC", "")))
+        line.append(Rest_elem[i*3+2].text)
+        content.append(line)
+    content.sort(key=lambda x:x[2])
+    
+    myDaDb = {"Hash": content[-1][0], "Time": content[-1][1], "BTC":  content[-1][2], "Dollars":  content[-1][3]}
+
+    c = col_DaDbBits.insert_one(myDaDb)
+
+    print(c.inserted_id)
+    
+#    with open("Blockchain_Scraper_Logfile.txt", "a") as f:
+#        print(content[-1], file=f)
 
 while True:
-scraper()
+    scraper()
     time.sleep(60)
